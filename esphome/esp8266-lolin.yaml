@@ -1,0 +1,101 @@
+esphome:
+  name: esp8266-lolin
+
+esp8266:
+  board: nodemcuv2
+
+
+
+# Enable logging
+logger:
+
+wifi:
+  ssid: "Nerdland"
+  password: "dobberml"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Test Fallback Hotspot"
+    password: "ccmflyKOXcrO"
+
+ota:
+  safe_mode: true
+  password: !secret ota_password
+
+captive_portal:
+
+mqtt:
+  broker: 192.168.1.208
+  topic_prefix: "home/esp8266-lolin"
+
+web_server:
+  port: 80
+
+i2c:
+
+sensor:
+  - platform: bme680
+    temperature:
+      name: "BME680 Temperature"
+      oversampling: 16x
+    pressure:
+      name: "BME680 Pressure"
+      oversampling: 16x
+    humidity:
+      name: "BME680 Humidity"
+      oversampling: 16x
+    gas_resistance:
+      name: "BME680 Gas Resistance"
+    address: 0x77
+    update_interval: 60s
+
+  - platform: bme680_bsec
+    temperature:
+      name: "Temperature"
+      # ulp (5min) or lp (3s)
+      #sample_rate: lp
+    pressure:
+      name: "Pressure"
+      #sample_rate: lp
+    humidity:
+      name: "Humidity"
+      #sample_rate: lp
+    iaq:
+      name: "IAQ"
+    co2_equivalent:
+      name: "CO2 Equivalent"
+    breath_voc_equivalent:
+      name: "Breath VOC Equivalent"
+  - platform: sgp30
+    eco2:
+      name: "SGP30 CO2 Equivalent"
+      accuracy_decimals: 2
+    tvoc:
+      name: "SGP30 Total VOC"
+      accuracy_decimals: 2
+
+bme680_bsec:
+    address: 0x76
+    sample_rate: ulp
+
+# Stuff for testing
+
+mcp23008:
+  - id: "mcp23008_hub"
+
+switch:
+  - platform: gpio
+    name: "Test GPIO Output"
+    pin: D4
+  - platform: gpio
+    name: "MCP23008 Pin 0"
+    pin:
+      mcp23xxx: mcp23008_hub
+      number: 0
+      mode:
+        output: true
+
+binary_sensor:
+  - platform: gpio
+    name: "Test GPIO Input"
+    pin: D6

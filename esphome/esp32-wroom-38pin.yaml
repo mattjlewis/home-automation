@@ -1,0 +1,47 @@
+esphome:
+  name: esp32-wroom-38pin
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+wifi:
+  ssid: "Nerdland"
+  password: "dobberml"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp32-Wroom-38Pin"
+    password: "c8YKpHKg0NS2"
+
+ota:
+  safe_mode: true
+  password: !secret ota_password
+
+captive_portal:
+
+mqtt:
+  broker: 192.168.1.208
+  topic_prefix: "home/esp32-wroom-38pin"
+
+web_server:
+  port: 80
+
+i2c:
+
+sensor:
+  - platform: bme280
+    address: 0x76
+    temperature:
+      name: "Temperature"
+    pressure:
+      name: "Pressure"
+    humidity:
+      name: "Humidity"
+  - platform: bh1750
+    name: "Ambient Light"
+    update_interval: 60s
