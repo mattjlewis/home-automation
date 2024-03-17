@@ -1,6 +1,7 @@
 substitutions:
   name: esp8266-lolin
   log_level: INFO
+  location: "Not placed"
 
 esphome:
   name: ${name}

@@ -1,6 +1,7 @@
 substitutions:
   name: esp8266-lolin-2
   log_level: INFO
+  location: "Main bedroom"
 
 esphome:
   name: ${name}

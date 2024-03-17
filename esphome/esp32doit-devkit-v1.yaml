@@ -1,6 +1,7 @@
 substitutions:
   name: esp32doit-devkit-v1
   log_level: INFO
+  location: "Goden office - plants"
 
 esphome:
   name: ${name}
