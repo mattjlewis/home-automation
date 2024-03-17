@@ -1,46 +1,30 @@
-esphome:
+substitutions:
   name: esp8266-lolin-2
+  log_level: INFO
+
+esphome:
+  name: ${name}
 
 esp8266:
   board: nodemcuv2
 
-
-
-# Enable logging
-logger:
-
-wifi:
-  ssid: "Nerdland"
-  password: "dobberml"
-
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
-  ap:
-    ssid: "Test Fallback Hotspot"
-    password: "ccmflyKOXcrO"
-
-ota:
-  safe_mode: true
-  password: !secret ota_password
-
-captive_portal:
-
-mqtt:
-  broker: 192.168.1.208
-  topic_prefix: "home/esp8266-lolin-2"
-
-web_server:
-  port: 80
-
-i2c:
+packages:
+  wifi: !include common/wifi.yaml
+  device_base: !include common/device_base.yaml
+  esp8266_i2c: !include common/esp8266_i2c.yaml
 
 sensor:
-  - platform: bme280
+  - platform: bme280_i2c
     temperature:
+      id: temperature
       name: "Temperature"
     pressure:
+      id: pressure
       name: "Pressure"
     humidity:
+      id: humidity
       name: "Humidity"
     address: 0x76
   - platform: tsl2561
+    id: ambient_light
     name: "Ambient Light"

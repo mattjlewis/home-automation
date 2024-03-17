@@ -1,35 +1,16 @@
-esphome:
+substitutions:
   name: esp8266-lolin
+  log_level: INFO
+
+esphome:
+  name: ${name}
 
 esp8266:
   board: nodemcuv2
 
-
-
-# Enable logging
-logger:
-
-wifi:
-  ssid: "Nerdland"
-  password: "dobberml"
-
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
-  ap:
-    ssid: "Test Fallback Hotspot"
-    password: "ccmflyKOXcrO"
-
-ota:
-  safe_mode: true
-  password: !secret ota_password
-
-captive_portal:
-
-mqtt:
-  broker: 192.168.1.208
-  topic_prefix: "home/esp8266-lolin"
-
-web_server:
-  port: 80
+packages:
+  wifi: !include common/wifi.yaml
+  device_base: !include common/device_base.yaml
 
 i2c:
 
