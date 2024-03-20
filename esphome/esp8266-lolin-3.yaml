@@ -1,0 +1,26 @@
+substitutions:
+  name: esp8266-lolin-3
+  log_level: INFO
+  location: "Garden office - by PC"
+
+esp8266:
+  board: nodemcuv2
+
+packages:
+  wifi: !include common/wifi.yaml
+  device_base: !include common/device_base.yaml
+
+i2c:
+
+sensor:
+  - platform: bme280_i2c
+    address: 0x76
+    temperature:
+      name: "Temperature"
+    pressure:
+      name: "Pressure"
+    humidity:
+      name: "Humidity"
+  - platform: bh1750
+    name: "Ambient Light"
+    update_interval: 60s

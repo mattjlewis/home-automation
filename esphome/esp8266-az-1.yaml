@@ -1,0 +1,88 @@
+substitutions:
+  name: esp8266-az-1
+  log_level: INFO
+  location: "Garden office - light"
+
+esp8266:
+  board: nodemcuv2
+
+packages:
+  wifi: !include common/wifi.yaml
+  device_base: !include common/device_base.yaml
+  esp8266_i2c: !include common/esp8266_i2c.yaml
+  esp8266_spi: !include common/esp8266_spi.yaml
+
+#external_components:
+#  - source: github://Schluggi/esphome@bsec2
+#    components:
+#  - bme680_bsec
+
+bme680_bsec:
+    address: 0x76
+    # ulp (5min) or lp (3s) (what about scan?)
+    sample_rate: ulp
+
+sensor:
+  - platform: bme680_bsec
+    temperature:
+      id: temperature
+      name: "Temperature"
+      #sample_rate: lp
+    pressure:
+      id: pressure
+      name: "Pressure"
+      #sample_rate: lp
+    humidity:
+      id: humidity
+      name: "Humidity"
+      #sample_rate: lp
+    iaq:
+      name: "IAQ"
+    co2_equivalent:
+      name: "CO2 Equivalent"
+      id: co2_equivalent
+    breath_voc_equivalent:
+      name: "Breath VOC Equivalent"
+      id: breath_voc_equivalent
+
+font:
+  - file: "gfonts://Open Sans"
+    size: 12
+    id: title_font
+  - file: "gfonts://Open Sans"
+    size: 26
+    id: time_font
+  - file: "gfonts://Inconsolata"
+    size: 16
+    id: data_font
+
+color:
+  - id: color_title
+    red: 100%
+    green: 0%
+    blue: 0%
+  - id: color_time
+    red: 0%
+    green: 100%
+    blue: 0%
+  - id: color_data
+    red: 50%
+    green: 50%
+    blue: 100%
+
+display:
+  - platform: ssd1331_spi
+    # 96x64 16-bit colour (5-6-5 RGB)
+    rotation: 180
+    reset_pin: D0
+    dc_pin: D3
+    cs_pin: GPIO15
+    lambda: |-
+      it.strftime(47, 0, id(time_font), color_time, TextAlign::TOP_CENTER, "%H:%M", id(sntp_time).now());
+      if (id(temperature).has_state()) {
+        it.printf(0, 37, id(data_font), color_data, TextAlign::CENTER_LEFT, "%.1f°C", id(temperature).state);
+      }
+      if (id(humidity).has_state()) {
+        it.printf(95, 37, id(data_font), color_data, TextAlign::CENTER_RIGHT, "%.1f%%", id(humidity).state);
+      }
+      it.print(47, 63, id(title_font), color_title, TextAlign::BOTTOM_CENTER, "${name}");
