@@ -3,9 +3,6 @@ substitutions:
   log_level: INFO
   location: "Not placed"
 
-esphome:
-  name: ${name}
-
 esp8266:
   board: nodemcuv2
 

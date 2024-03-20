@@ -3,9 +3,6 @@ substitutions:
   log_level: INFO
   location: "Main bedroom"
 
-esphome:
-  name: ${name}
-
 esp8266:
   board: nodemcuv2
 
