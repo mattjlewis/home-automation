@@ -78,3 +78,6 @@ binary_sensor:
   - platform: gpio
     name: "Test GPIO Input"
     pin: D6
+
+# display:
+#  - platform: st7789v

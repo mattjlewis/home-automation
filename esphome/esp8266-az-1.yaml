@@ -19,6 +19,7 @@ packages:
 
 bme680_bsec:
     address: 0x76
+    iaq_mode: static
     # ulp (5min) or lp (3s) (what about scan?)
     sample_rate: ulp
 
@@ -36,14 +37,26 @@ sensor:
       id: humidity
       name: "Humidity"
       #sample_rate: lp
+    gas_resistance:
+      id: gas_resistance
+      name: "Gas Resistance"
     iaq:
       name: "IAQ"
+    iaq_accuracy:
+      id: iaq_accuracy_num
+      name: "Numeric IAQ Accuracy"
     co2_equivalent:
-      name: "CO2 Equivalent"
       id: co2_equivalent
+      name: "CO2 Equivalent"
     breath_voc_equivalent:
-      name: "Breath VOC Equivalent"
       id: breath_voc_equivalent
+      name: "Breath VOC Equivalent"
+
+text_sensor:
+  - platform: bme680_bsec
+    iaq_accuracy:
+      id: iaq_accuracy
+      name: "IAQ Accuracy"
 
 font:
   - file: "gfonts://Open Sans"
