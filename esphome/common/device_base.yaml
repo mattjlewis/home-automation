@@ -5,7 +5,7 @@ ota:
   safe_mode: true
   password: !secret ota_password
 
-captive_portal:
+# captive_portal:
 
 mqtt:
   broker: !secret mqtt_broker
@@ -13,8 +13,8 @@ mqtt:
   discovery_object_id_generator: device_name
   topic_prefix: "home/${name}"
 
-web_server:
-  port: 80
+# web_server:
+#  port: 80
 
 time:
   platform: sntp

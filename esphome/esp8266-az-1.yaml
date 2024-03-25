@@ -41,6 +41,7 @@ sensor:
       id: gas_resistance
       name: "Gas Resistance"
     iaq:
+      id: iaq
       name: "IAQ"
     iaq_accuracy:
       id: iaq_accuracy_num
@@ -59,29 +60,62 @@ text_sensor:
       name: "IAQ Accuracy"
 
 font:
-  - file: "gfonts://Open Sans"
-    size: 12
-    id: title_font
-  - file: "gfonts://Open Sans"
-    size: 26
-    id: time_font
-  - file: "gfonts://Inconsolata"
+  - id: f_time
+    file: "gfonts://Open Sans"
+    size: 22
+  - id: f_data
+    file: "gfonts://Inconsolata"
     size: 16
-    id: data_font
+  - id: f_name
+    file: "gfonts://Open Sans"
+    size: 12
 
 color:
-  - id: color_title
+  - id: c_name
     red: 100%
     green: 0%
     blue: 0%
-  - id: color_time
+  - id: c_time
     red: 0%
     green: 100%
     blue: 0%
-  - id: color_data
+  - id: c_data
     red: 50%
     green: 50%
     blue: 100%
+  # https://www.city-data.com/forum/weather/1881823-tempature-types-colours.html
+  - id: ct_vcold
+    red: 80%
+    green: 100%
+    blue: 100%
+  - id: ct_cold
+    red: 80%
+    green: 100%
+    blue: 80%
+  - id: ct_cool
+    red: 100%
+    green: 100%
+    blue: 60%
+  - id: ct_mild
+    red: 100%
+    green: 100%
+    blue: 0%
+  - id: ct_mod
+    red: 100%
+    green: 80%
+    blue: 0%
+  - id: ct_warm
+    red: 100%
+    green: 50%
+    blue: 0%
+  - id: ct_vwarm
+    red: 100%
+    green: 40%
+    blue: 0%
+  - id: ct_hot
+    red: 100%
+    green: 0%
+    blue: 0%
 
 display:
   - platform: ssd1331_spi
@@ -91,11 +125,32 @@ display:
     dc_pin: D3
     cs_pin: GPIO15
     lambda: |-
-      it.strftime(47, 0, id(time_font), color_time, TextAlign::TOP_CENTER, "%H:%M", id(sntp_time).now());
+      it.strftime(0, 0, id(f_time), c_time, TextAlign::TOP_LEFT, "%H:%M", id(sntp_time).now());
+      if (id(iaq).has_state()) {
+        it.printf(95, 0, id(f_data), c_data, TextAlign::TOP_RIGHT, "%.0f", id(iaq).state);
+      }
       if (id(temperature).has_state()) {
-        it.printf(0, 37, id(data_font), color_data, TextAlign::CENTER_LEFT, "%.1f°C", id(temperature).state);
+        esphome::Color ct;
+        if (id(temperature).state < 6) {
+          ct = ct_vcold;
+        } else if (id(temperature).state < 10) {
+          ct = ct_cold;
+        } else if (id(temperature).state < 14) {
+          ct = ct_cool;
+        } else if (id(temperature).state < 18) {
+          ct = ct_mild;
+        } else if (id(temperature).state < 23) {
+          ct = ct_mod;
+        } else if (id(temperature).state < 27) {
+          ct = ct_warm;
+        } else if (id(temperature).state < 30) {
+          ct = ct_vwarm;
+        } else {
+          ct = ct_hot;
+        }
+        it.printf(0, 37, id(f_data), ct, TextAlign::CENTER_LEFT, "%.1f°C", id(temperature).state);
       }
       if (id(humidity).has_state()) {
-        it.printf(95, 37, id(data_font), color_data, TextAlign::CENTER_RIGHT, "%.1f%%", id(humidity).state);
+        it.printf(95, 37, id(f_data), c_data, TextAlign::CENTER_RIGHT, "%.1f%%", id(humidity).state);
       }
-      it.print(47, 63, id(title_font), color_title, TextAlign::BOTTOM_CENTER, "${name}");
+      it.print(47, 63, id(f_name), c_name, TextAlign::BOTTOM_CENTER, "${name}");

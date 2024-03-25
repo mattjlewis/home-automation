@@ -12,45 +12,55 @@ packages:
   esp8266_i2c: !include common/esp8266_i2c.yaml
   esp8266_spi: !include common/esp8266_spi.yaml
 
+bme680_bsec:
+  address: 0x77
+  iaq_mode: static
+  # ulp (5min) or lp (3sec)
+  sample_rate: ulp
+
 sensor:
-  - platform: bme680
+  - platform: bme680_bsec
     temperature:
+      id: temperature
       name: "Temperature"
-      id: bme680_temperature
-      oversampling: 16x
     pressure:
+      id: pressure
       name: "Pressure"
-      id: bme680_pressure
-      oversampling: 16x
     humidity:
+      id: humidity
       name: "Humidity"
-      id: bme680_humidity
-      oversampling: 16x
     gas_resistance:
-      name: "Gas Resistance"
       id: gas_resistance
-    address: 0x77
-    iir_filter: 31x
-    update_interval: 60s
-  - platform: template
-    id: iaq
-    name: "IAQ"
-    icon: "mdi:gauge"
-    # unit_of_measurement: "IAQ"
-    # Calculation: comp_gas = log(R_gas[ohm]) + 0.04 log(Ohm)/%rh * hum[%rh]
-    lambda: |-
-      return log(id(gas_resistance).state) + 0.04 * id(bme680_humidity).state;
+      name: "Gas Resistance"
+    iaq:
+      id: iaq
+      name: "IAQ"
+    iaq_accuracy:
+      id: iaq_accuracy_num
+      name: "Numeric IAQ Accuracy"
+    co2_equivalent:
+      id: co2_equivalent
+      name: "CO2 Equivalent"
+    breath_voc_equivalent:
+      id: breath_voc_equivalent
+      name: "Breath VOC Equivalent"
+
+text_sensor:
+  - platform: bme680_bsec
+    iaq_accuracy:
+      id: iaq_accuracy
+      name: "IAQ Accuracy"
 
 font:
-  - file: "gfonts://Open Sans"
+  - id: f_title
+    file: "gfonts://Open Sans"
     size: 12
-    id: title_font
-  - file: "gfonts://Open Sans"
+  - id: f_time
+    file: "gfonts://Open Sans"
     size: 26
-    id: time_font
-  - file: "gfonts://Inconsolata"
+  - id: f_data
+    file: "gfonts://Inconsolata"
     size: 14
-    id: data_font
 
 display:
   - platform: ssd1306_spi
@@ -61,12 +71,15 @@ display:
     cs_pin: GPIO15
     rotation: 180
     lambda: |-
-      it.print(63, 0, id(title_font), TextAlign::TOP_CENTER, "${name}");
-      it.strftime(63, 30, id(time_font), TextAlign::CENTER, "%H:%M", id(sntp_time).now());
-      if (id(bme680_temperature).has_state()) {
-        it.printf(0, 63, id(data_font), TextAlign::BOTTOM_LEFT , "%.1f°C", id(bme680_temperature).state);
+      it.strftime(0, 0, id(f_time), TextAlign::TOP_LEFT, "%H:%M", id(sntp_time).now());
+      if (id(iaq).has_state()) {
+        it.printf(127, 0, id(f_data), TextAlign::TOP_RIGHT , "%.0f", id(iaq).state);
       }
-      if (id(bme680_humidity).has_state()) {
-        it.printf(127, 63, id(data_font), TextAlign::BOTTOM_RIGHT , "%.1f%%rH", id(bme680_humidity).state);
+      if (id(temperature).has_state()) {
+        it.printf(0, 37, id(f_data), TextAlign::CENTER_LEFT , "%.1f°C", id(temperature).state);
       }
+      if (id(humidity).has_state()) {
+        it.printf(127, 37, id(f_data), TextAlign::CENTER_RIGHT , "%.1f%%rH", id(humidity).state);
+      }
+      it.print(63, 63, id(f_title), TextAlign::BOTTOM_CENTER, "${name}");
 

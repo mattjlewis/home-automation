@@ -9,8 +9,7 @@ esp8266:
 packages:
   wifi: !include common/wifi.yaml
   device_base: !include common/device_base.yaml
-
-i2c:
+  esp8266_i2c: !include common/esp8266_i2c.yaml
 
 sensor:
   - platform: bme680
