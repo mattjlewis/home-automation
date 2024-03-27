@@ -1,0 +1,46 @@
+color:
+  - id: c_time
+    red: 0%
+    green: 100%
+    blue: 0%
+  - id: c_data
+    red: 50%
+    green: 50%
+    blue: 100%
+  - id: c_name
+    red: 100%
+    green: 0%
+    blue: 0%
+  # https://www.city-data.com/forum/weather/1881823-tempature-types-colours.html
+  - id: ct_vcold
+    red: 80%
+    green: 100%
+    blue: 100%
+  - id: ct_cold
+    red: 80%
+    green: 100%
+    blue: 80%
+  - id: ct_cool
+    red: 100%
+    green: 100%
+    blue: 60%
+  - id: ct_mild
+    red: 100%
+    green: 100%
+    blue: 0%
+  - id: ct_mod
+    red: 100%
+    green: 80%
+    blue: 0%
+  - id: ct_warm
+    red: 100%
+    green: 50%
+    blue: 0%
+  - id: ct_vwarm
+    red: 100%
+    green: 40%
+    blue: 0%
+  - id: ct_hot
+    red: 100%
+    green: 0%
+    blue: 0%

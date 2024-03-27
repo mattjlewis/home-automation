@@ -1,0 +1,121 @@
+substitutions:
+  name: esp32s3-1
+  log_level: INFO
+  location: "Not placed"
+  f_time_size: "50"
+  f_data_size: "36"
+  f_name_size: "20"
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+
+packages:
+  wifi: !include common/wifi.yaml
+  device_base: !include common/device_base.yaml
+  colours: !include common/colours.yaml
+  fonts: !include common/fonts.yaml
+
+i2c:
+  sda: GPIO8
+  scl: GPIO9
+
+spi:
+  clk_pin: GPIO12
+  mosi_pin: GPIO11
+  miso_pin: GPIO13
+  interface: any
+
+# spi_device:
+#  id: spidev
+#  cs_pin: GPIO10
+#  data_rate: 40MHz
+#  mode: mode3
+
+sensor:
+  - platform: bme280_i2c
+    temperature:
+      id: temperature
+      name: "Temperature"
+    pressure:
+      id: pressure
+      name: "Pressure"
+    humidity:
+      id: humidity
+      name: "Humidity"
+    address: 0x76
+
+graph:
+  - id: temperature_graph
+    sensor: temperature
+    duration: 12h
+    width: 230
+    height: 100
+    x_grid: 2h
+    y_grid: 5 # degC/div
+    color: c_data
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: my_light  
+    rgb_order: GRB
+    pin: GPIO48
+    num_leds: 1
+    rmt_channel: 0
+    chipset: ws2812
+    name: "My Light"
+    effects:
+      - pulse:
+          transition_length: 550ms
+          update_interval: 550ms
+
+display:
+#  - platform: ili9xxx
+#    model: st7789v
+#    dc_pin: GPIO18
+#    reset_pin: GPIO17
+#    dimensions:
+#      height: 240
+#      width: 240
+#      offset_height: 0
+#      offset_width: 0
+  - platform: st7789v
+    model: "Custom"
+    height: 240
+    width: 240
+    offset_height: 0
+    offset_width: 0
+    cs_pin: GPIO10 # CS - pin not present on display
+    dc_pin: GPIO18 # DC
+    reset_pin: GPIO17 # RES
+    backlight_pin: GPIO16 # BLK
+    data_rate: 40MHz
+    spi_mode: mode3
+    lambda: |-
+      it.strftime(0, 0, id(f_time), c_time, TextAlign::TOP_LEFT, "%H:%M", id(sntp_time).now());
+      it.print(it.get_width()-1, 0, id(f_name), c_name, TextAlign::TOP_RIGHT, "${name}");
+      if (id(temperature).has_state()) {
+        esphome::Color ct;
+        if (id(temperature).state < 6) {
+          ct = ct_vcold;
+        } else if (id(temperature).state < 10) {
+          ct = ct_cold;
+        } else if (id(temperature).state < 14) {
+          ct = ct_cool;
+        } else if (id(temperature).state < 18) {
+          ct = ct_mild;
+        } else if (id(temperature).state < 23) {
+          ct = ct_mod;
+        } else if (id(temperature).state < 27) {
+          ct = ct_warm;
+        } else if (id(temperature).state < 30) {
+          ct = ct_vwarm;
+        } else {
+          ct = ct_hot;
+        }
+        it.printf(0, it.get_height()/3, id(f_data), ct, TextAlign::CENTER_LEFT, "%.1f°C", id(temperature).state);
+      }
+      if (id(humidity).has_state()) {
+        it.printf(it.get_width()-1, it.get_height()/3, id(f_data), c_data, TextAlign::CENTER_RIGHT, "%.1f%%", id(humidity).state);
+      }
+      it.graph(10, 120, id(temperature_graph));

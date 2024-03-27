@@ -1,0 +1,15 @@
+substitutions:
+  mono_font: "gfonts://Inconsolata"
+  sans_font: "gfonts://Open Sans"
+
+font:
+  - id: f_time
+    file: "${mono_font}"
+    size: ${f_time_size}
+  - id: f_data
+    file: "${mono_font}"
+    size: ${f_data_size}
+  - id: f_name
+    file: "${sans_font}"
+    size: ${f_name_size}
+

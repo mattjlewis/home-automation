@@ -2,6 +2,9 @@ substitutions:
   name: esp8266-az-1
   log_level: INFO
   location: "Garden office - light"
+  f_time_size: "22"
+  f_data_size: "16"
+  f_name_size: "12"
 
 esp8266:
   board: nodemcuv2
@@ -11,6 +14,8 @@ packages:
   device_base: !include common/device_base.yaml
   esp8266_i2c: !include common/esp8266_i2c.yaml
   esp8266_spi: !include common/esp8266_spi.yaml
+  colours: !include common/colours.yaml
+  fonts: !include common/fonts.yaml
 
 #external_components:
 #  - source: github://Schluggi/esphome@bsec2
@@ -59,64 +64,6 @@ text_sensor:
       id: iaq_accuracy
       name: "IAQ Accuracy"
 
-font:
-  - id: f_time
-    file: "gfonts://Open Sans"
-    size: 22
-  - id: f_data
-    file: "gfonts://Inconsolata"
-    size: 16
-  - id: f_name
-    file: "gfonts://Open Sans"
-    size: 12
-
-color:
-  - id: c_name
-    red: 100%
-    green: 0%
-    blue: 0%
-  - id: c_time
-    red: 0%
-    green: 100%
-    blue: 0%
-  - id: c_data
-    red: 50%
-    green: 50%
-    blue: 100%
-  # https://www.city-data.com/forum/weather/1881823-tempature-types-colours.html
-  - id: ct_vcold
-    red: 80%
-    green: 100%
-    blue: 100%
-  - id: ct_cold
-    red: 80%
-    green: 100%
-    blue: 80%
-  - id: ct_cool
-    red: 100%
-    green: 100%
-    blue: 60%
-  - id: ct_mild
-    red: 100%
-    green: 100%
-    blue: 0%
-  - id: ct_mod
-    red: 100%
-    green: 80%
-    blue: 0%
-  - id: ct_warm
-    red: 100%
-    green: 50%
-    blue: 0%
-  - id: ct_vwarm
-    red: 100%
-    green: 40%
-    blue: 0%
-  - id: ct_hot
-    red: 100%
-    green: 0%
-    blue: 0%
-
 display:
   - platform: ssd1331_spi
     # 96x64 16-bit colour (5-6-5 RGB)
@@ -127,7 +74,7 @@ display:
     lambda: |-
       it.strftime(0, 0, id(f_time), c_time, TextAlign::TOP_LEFT, "%H:%M", id(sntp_time).now());
       if (id(iaq).has_state()) {
-        it.printf(95, 0, id(f_data), c_data, TextAlign::TOP_RIGHT, "%.0f", id(iaq).state);
+        it.printf(it.get_width()-1, 0, id(f_data), c_data, TextAlign::TOP_RIGHT, "%.0f", id(iaq).state);
       }
       if (id(temperature).has_state()) {
         esphome::Color ct;
@@ -148,9 +95,9 @@ display:
         } else {
           ct = ct_hot;
         }
-        it.printf(0, 37, id(f_data), ct, TextAlign::CENTER_LEFT, "%.1f°C", id(temperature).state);
+        it.printf(0, it.get_height()/2, id(f_data), ct, TextAlign::CENTER_LEFT, "%.1f°C", id(temperature).state);
       }
       if (id(humidity).has_state()) {
-        it.printf(95, 37, id(f_data), c_data, TextAlign::CENTER_RIGHT, "%.1f%%", id(humidity).state);
+        it.printf(it.get_width()-1, it.get_height()/2, id(f_data), c_data, TextAlign::CENTER_RIGHT, "%.1f%%", id(humidity).state);
       }
-      it.print(47, 63, id(f_name), c_name, TextAlign::BOTTOM_CENTER, "${name}");
+      it.print(it.get_width()/2, it.get_height()-1, id(f_name), c_name, TextAlign::BOTTOM_CENTER, "${name}");

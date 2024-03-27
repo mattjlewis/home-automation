@@ -2,6 +2,9 @@ substitutions:
   name: esp8266-az-2
   log_level: INFO
   location: "Lounge"
+  f_time_size: "26"
+  f_data_size: "14"
+  f_name_size: "12"
 
 esp8266:
   board: nodemcuv2
@@ -11,6 +14,7 @@ packages:
   device_base: !include common/device_base.yaml
   esp8266_i2c: !include common/esp8266_i2c.yaml
   esp8266_spi: !include common/esp8266_spi.yaml
+  fonts: !include common/fonts.yaml
 
 bme680_bsec:
   address: 0x77
@@ -51,17 +55,6 @@ text_sensor:
       id: iaq_accuracy
       name: "IAQ Accuracy"
 
-font:
-  - id: f_title
-    file: "gfonts://Open Sans"
-    size: 12
-  - id: f_time
-    file: "gfonts://Open Sans"
-    size: 26
-  - id: f_data
-    file: "gfonts://Inconsolata"
-    size: 14
-
 display:
   - platform: ssd1306_spi
     # 128x64 mono
@@ -73,13 +66,13 @@ display:
     lambda: |-
       it.strftime(0, 0, id(f_time), TextAlign::TOP_LEFT, "%H:%M", id(sntp_time).now());
       if (id(iaq).has_state()) {
-        it.printf(127, 0, id(f_data), TextAlign::TOP_RIGHT , "%.0f", id(iaq).state);
+        it.printf(it.get_width()-1, 0, id(f_data), TextAlign::TOP_RIGHT , "%.0f", id(iaq).state);
       }
       if (id(temperature).has_state()) {
-        it.printf(0, 37, id(f_data), TextAlign::CENTER_LEFT , "%.1f°C", id(temperature).state);
+        it.printf(0, it.get_height()/2, id(f_data), TextAlign::CENTER_LEFT , "%.1f°C", id(temperature).state);
       }
       if (id(humidity).has_state()) {
-        it.printf(127, 37, id(f_data), TextAlign::CENTER_RIGHT , "%.1f%%rH", id(humidity).state);
+        it.printf(it.get_width()-1, it.get_height()/2, id(f_data), TextAlign::CENTER_RIGHT , "%.1f%%rH", id(humidity).state);
       }
-      it.print(63, 63, id(f_title), TextAlign::BOTTOM_CENTER, "${name}");
+      it.print(it.get_width()/2, it.get_height()-1, id(f_name), TextAlign::BOTTOM_CENTER, "${name}");
 
