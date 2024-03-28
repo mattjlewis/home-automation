@@ -24,26 +24,35 @@ spi:
   clk_pin: GPIO12
   mosi_pin: GPIO11
   miso_pin: GPIO13
-  interface: any
-
-# spi_device:
-#  id: spidev
-#  cs_pin: GPIO10
-#  data_rate: 40MHz
-#  mode: mode3
+  interface: spi2
 
 sensor:
   - platform: bme280_i2c
+    address: 0x76
     temperature:
       id: temperature
       name: "Temperature"
+      #sample_rate: lp
     pressure:
       id: pressure
       name: "Pressure"
+      #sample_rate: lp
     humidity:
       id: humidity
       name: "Humidity"
-    address: 0x76
+      #sample_rate: lp
+  - platform: sgp30
+    eco2:
+      id: eco2
+      name: "eCO2"
+      accuracy_decimals: 1
+    tvoc:
+      id: tvoc
+      name: "TVOC"
+      accuracy_decimals: 1
+    store_baseline: yes
+    address: 0x58
+    update_interval: 1s
 
 graph:
   - id: temperature_graph
@@ -69,28 +78,38 @@ light:
           transition_length: 550ms
           update_interval: 550ms
 
+spi_device:
+  id: spidev
+#  cs_pin: GPIO10
+  data_rate: 40MHz
+  mode: mode3
+
 display:
-#  - platform: ili9xxx
-#    model: st7789v
-#    dc_pin: GPIO18
-#    reset_pin: GPIO17
-#    dimensions:
-#      height: 240
-#      width: 240
-#      offset_height: 0
-#      offset_width: 0
-  - platform: st7789v
-    model: "Custom"
-    height: 240
-    width: 240
-    offset_height: 0
-    offset_width: 0
-    cs_pin: GPIO10 # CS - pin not present on display
-    dc_pin: GPIO18 # DC
-    reset_pin: GPIO17 # RES
-    backlight_pin: GPIO16 # BLK
+  - platform: ili9xxx
+    model: st7789v
     data_rate: 40MHz
     spi_mode: mode3
+    cs_pin: GPIO10 # CS - pin not present on display
+    dc_pin: GPIO18
+    reset_pin: GPIO17
+    invert_colors: true
+    dimensions:
+      height: 240
+      width: 240
+      offset_height: 0
+      offset_width: 0
+#  - platform: st7789v
+#    model: "Custom"
+#    height: 240
+#    width: 240
+#    offset_height: 0
+#    offset_width: 0
+#    data_rate: 40MHz
+#    spi_mode: mode3
+#    cs_pin: GPIO10 # CS - pin not present on display
+#    dc_pin: GPIO18 # DC
+#    reset_pin: GPIO17 # RES
+#    backlight_pin: GPIO16 # BLK
     lambda: |-
       it.strftime(0, 0, id(f_time), c_time, TextAlign::TOP_LEFT, "%H:%M", id(sntp_time).now());
       it.print(it.get_width()-1, 0, id(f_name), c_name, TextAlign::TOP_RIGHT, "${name}");

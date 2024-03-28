@@ -1,5 +1,7 @@
 logger:
   level: ${log_level}
+#  logs:
+#    component: ERROR
 
 ota:
   safe_mode: true
