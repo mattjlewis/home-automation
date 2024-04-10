@@ -1,7 +1,8 @@
 logger:
   level: ${log_level}
-#  logs:
-#    component: ERROR
+  logs:
+    mqtt.component: WARN
+    sensor.component: WARN
 
 ota:
   safe_mode: true

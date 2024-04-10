@@ -26,7 +26,55 @@ spi:
   miso_pin: GPIO13
   interface: spi2
 
+# Define a PWM output on the ESP32
+# output:
+#   - platform: ledc
+#     pin: GPIO16
+#     id: gpio_32_backlight_pwm
+
+switch:
+  - platform: gpio
+    id: backlight_ctl
+    name: "Backlight Control"
+    pin:
+      number: GPIO16
+      mode: OUTPUT
+
+binary_sensor:
+  - platform: gpio
+    id: backlight_switch
+    name: "Backlight Toggle"
+    pin:
+      number: GPIO4
+      mode: INPUT_PULLDOWN
+      inverted: false
+    on_press:
+      then:
+        switch.toggle: backlight_ctl
+
 sensor:
+  - platform: adc
+    id: backlight_brightness
+    name: "Potentiometer"
+    pin: GPIO5
+    update_interval: 5s
+    attenuation: auto
+  - platform: adc
+    id: moisture
+    name: "Soil Moisture"
+    pin: GPIO6
+    attenuation: auto
+    update_interval: 60s
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    filters:
+      - calibrate_linear:
+        - 1.4 -> 100.0
+        - 3.1 -> 0.0
+      - lambda: |
+         if (x < 0) return 0;
+         else if (x > 100) return 100;
+         else return (x);
   - platform: bme280_i2c
     address: 0x76
     temperature:
@@ -46,10 +94,18 @@ sensor:
       id: eco2
       name: "eCO2"
       accuracy_decimals: 1
+      filters:
+        - sliding_window_moving_average:
+            window_size: 120
+            send_every: 120
     tvoc:
       id: tvoc
       name: "TVOC"
       accuracy_decimals: 1
+      filters:
+        - sliding_window_moving_average:
+            window_size: 120
+            send_every: 120
     store_baseline: yes
     address: 0x58
     update_interval: 1s
@@ -57,7 +113,7 @@ sensor:
 graph:
   - id: temperature_graph
     sensor: temperature
-    duration: 12h
+    duration: 6h
     width: 230
     height: 100
     x_grid: 2h
@@ -66,7 +122,7 @@ graph:
 
 light:
   - platform: esp32_rmt_led_strip
-    id: my_light  
+    id: led_rgb
     rgb_order: GRB
     pin: GPIO48
     num_leds: 1
@@ -75,8 +131,8 @@ light:
     name: "My Light"
     effects:
       - pulse:
-          transition_length: 550ms
-          update_interval: 550ms
+          transition_length: 1s
+          update_interval: 2s
 
 spi_device:
   id: spidev
@@ -87,32 +143,39 @@ spi_device:
 display:
   - platform: ili9xxx
     model: st7789v
-    data_rate: 40MHz
-    spi_mode: mode3
-    cs_pin: GPIO10 # CS - pin not present on display
-    dc_pin: GPIO18
-    reset_pin: GPIO17
     invert_colors: true
+    rotation: 180
     dimensions:
       height: 240
       width: 240
       offset_height: 0
       offset_width: 0
+    dc_pin: GPIO18         # DC
+    reset_pin: GPIO17      # RES
+    # backlight_pin: GPIO16 # BLK - backlight_pin not an option on this platform
+    # SPI device config
+    data_rate: 40MHz
+    spi_mode: mode3
+    cs_pin: GPIO10         # Chip Select - CS pin not present on my cheap ST7789
 #  - platform: st7789v
 #    model: "Custom"
 #    height: 240
 #    width: 240
 #    offset_height: 0
 #    offset_width: 0
-#    data_rate: 40MHz
-#    spi_mode: mode3
-#    cs_pin: GPIO10 # CS - pin not present on display
 #    dc_pin: GPIO18 # DC
 #    reset_pin: GPIO17 # RES
 #    backlight_pin: GPIO16 # BLK
+#    # SPI device config
+#    data_rate: 40MHz
+#    spi_mode: mode3
+#    cs_pin: GPIO10 # CS - pin not present on display
     lambda: |-
       it.strftime(0, 0, id(f_time), c_time, TextAlign::TOP_LEFT, "%H:%M", id(sntp_time).now());
       it.print(it.get_width()-1, 0, id(f_name), c_name, TextAlign::TOP_RIGHT, "${name}");
+      if (id(moisture).has_state()) {
+        it.printf(it.get_width()-1, 50, id(f_data), c_data, TextAlign::CENTER_RIGHT, "%.0f%%", id(moisture).state);
+      }
       if (id(temperature).has_state()) {
         esphome::Color ct;
         if (id(temperature).state < 6) {
